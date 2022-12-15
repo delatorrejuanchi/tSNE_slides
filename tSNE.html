@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Visualizing Data using t-SNE</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.4.0/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.4.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.4.0/theme/black.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.4.0/reveal.min.js"></script>
+
+    <style>
+        .slides section {
+            text-align: left;
+            font-size: 28px;
+        }
+        
+        section .smaller {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <section style="text-align: center;">
+                    <p class="r-fit-text">Visualizing Data using t-SNE</p>
+                    <p>Laurens van der Maaten and Goeffrey Hinton, 2008</p>
+                </section>
+                <section>
+                    <p class="r-fit-text">t-Distributed Stochastic Neighbor Embedding</p>
+                    <p class="fragment fade-up" data-fragment-index="1">Visualización de datos de alta dimensionalidad en dos o tres dimensiones</p>
+                    <p class="fragment fade-up" data-fragment-index="2">Variación sobre Stochastic Neighbor Embedding (Hinton and Roweis, 2002) pero más fácil de optimizar y con mejores visualizaciones</p>
+                    <p class="fragment fade-up" data-fragment-index="3">Extensión del algoritmo para datasets grandes sin grandes penalizaciones sobre el costo computacional</p>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <p class="r-fit-text">Métodos clásicos de reducción de dimensionalidad:</p>
+                    <ul class="fragment fade-up">
+                        <li>Principal Component Analysis (PCA; Hotelling, 1933)</li>
+                        <li>Multi Dimensional Scaling (MDS; Kruskal, 1964)</li>
+                    </ul>
+                    <div class="fragment fade-up">
+                        <p>Cuando los datos se encuentran en variedades no-lineales de baja dimensión embedidas en un espacio de alta dimensión, es más importante buscar que los puntos cercanos en el espacio original sigan siendo cercanos en la proyección</p>
+                        <p>Esto no suele ser posible mediante transformaciones lineales</p>
+                    </div>
+                </section>
+                <section>
+                    <p class="r-fit-text">Otros métodos de reducción de dimensionalidad</p>
+                    <ul>
+                        <li class="fragment highlight-green" data-fragment-index="1">Sammon mapping (Sammon, 1969)</li>
+                        <li>Curvilinear component analysis (CCA; Demartines and Hérault, 1997)</li>
+                        <li>Stochastic Neighbor Embedding (SNE; Hinton and Roweis, 2002)</li>
+                        <li class="fragment highlight-green" data-fragment-index="1">Isomap (Tenenbaum et al., 2000)</li>
+                        <li>Maximum Variance Unfolding (MVU; Weinberger et al., 2004)</li>
+                        <li class="fragment highlight-green" data-fragment-index="1">Locally Linear Embedding (LLE; Roweis and Saul, 2000)</li>
+                        <li>Laplacian Eigenmaps (Belkin and Niyogi, 2002)</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section>
+                <p class="r-fit-text">Esquema de la presentación:</p>
+                <ol>
+                    <li class="fragment fade-up">Introducción a SNE</li>
+                    <li class="fragment fade-up">Presentación de t-SNE</li>
+                    <li class="fragment fade-up">Experimentos comparando métodos</li>
+                    <li class="fragment fade-up">Debilidades de t-SNE</li>
+                    <li class="fragment fade-up">Conclusión</li>
+                </ol>
+            </section>
+
+            <section>
+                <section>
+                    <p class="r-fit-text">Stochastic Neighbor Embedding</p>
+                    <div class="smaller">
+                        <p class="fragment fade-up">\(\mathcal{X} = \{ x_1, x_2, \ldots, x_n \} \longrightarrow \mathcal{Y} = \{ y_1, y_2, \ldots, y_n \}\) </p>
+                        <p class="fragment fade-up"><b>Idea:</b></p>
+                        <p class="fragment fade-up">Convertir las distancias de los datos en una matriz de similitudes dadas por probabilidades condicionales</p>
+                        <p class="fragment fade-up">Buscar una representación \(\mathcal{Y}\) con una matriz de similitudes lo más parecida posible a la de \(\mathcal{X}\)</p>
+                    </div>
+                </section>
+
+                <section>
+                    <p>Definimos la similitud del punto \(x_j\) con el punto \(x_i\) como \(p_{j|i}\)</p>
+
+                    <div class="smaller">
+                        <p>\(p_{j|i}\): la probabilidad de que \(x_i\) elijiría a \(x_j\) como su vecino si los vecinos fueran seleccionados aleatoriamente en base a una distribución Gaussiana centrada en \(x_i\)</p>
+                        <p>\(\sigma_i\): desviación estándar de la distribución Gaussiana centrada en \(x_i\)</p>
+                    </div>
+
+                    <div>
+                        \[
+                        p_{j|i} = 
+                        \begin{cases}
+                        \frac{exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)} & i \neq j \\
+                        0 & i = j
+                        \end{cases}
+                        \]
+                    </div>
+                </section>
+                
+                <!-- <section>
+                    <p>¿Cómo elegimos \(\sigma_i\)?</p>
+                    <div class="smaller">
+                        <div class="fragment fade-up">
+                            <p>Realizamos una búsqueda binaria para encontrar el \(\sigma_i\) tal que \(P_i\) tenga una perplejidad dada por el usuario</p>
+                            <p>\(P_i = (p_{j|i})_{j=1}^n\)</p>
+                            <p>\(\mathcal{Perp}(P_i) = 2^{H(P_i)}\)</p>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>Donde \(H(P_i)\) es la entropía de Shannon de \(P_i\)</p>
+                            <p>\(H(P_i) = -\sum_{j} p_{j|i} \log_2 p_{j|i}\)</p>
+                        </div>
+                        <div class="fragment fade-up">
+                            <p>La perplejidad puede ser interpretada como una medida del número de vecinos, con valores típicos entre 5 y 50</p>
+                            <p>SNE es relativamente robusto a cambios en la perplejidad</p>
+                        </div>
+                    </div>
+                </section> -->
+
+                <section>
+                    <p>Definimos la similitud del punto \(y_j\) con el punto \(y_i\) como \(q_{j|i}\)</p>
+                    <div class="smaller">
+                        <p>\(q_{j|i}\): la probabilidad de que \(y_i\) elijiría a \(y_j\) como su vecino si los vecinos fueran seleccionados aleatoriamente en base a una distribución Gaussiana centrada en \(y_i\)</p>
+                    </div>
+                    <div>
+                        \[
+                        q_{j|i} = 
+                        \begin{cases}
+                        \frac{exp(-\|y_i - y_j\|^2)}{\sum_{k \neq i} exp(-\|y_i - y_k\|^2)} & i \neq j \\
+                        0 & i = j
+                        \end{cases}
+                        \]
+                    </div>
+                    <div class="fragment fade-up">
+                        \[\sigma = \frac{1}{\sqrt{2}}\]
+                    </div>
+                </section>
+
+                <section>
+                    <p>Definimos el costo de una representación como la suma de las divergencias de Kullback-Leibler entre \(P_i\) y \(Q_i\):</p>
+                    <p>\[C = \sum_i KL(P_i || Q_i) = \sum_{i, j} p_{j|i} \log \frac{p_{j|i}}{q_{j|i}}\]</p>
+                    <div class="fragment fade-up">
+                        <p>Minimizamos el costo de la representación usando descenso por el gradiente</p>
+                        <p>
+                            \[
+                            \frac{\partial C}{\partial y_i} = 2 \sum_j (p_{j|i} - q_{j|i} + p_{i|j} - q_{i|j})(y_i - y_j)
+                            \]
+                        </p>
+                    </div>
+                </section>
+
+                <section>
+                    <div>
+                        \[
+                        \mathcal{Y}^{(t)} = \mathcal{Y}^{(t-1)} - \eta \frac{\partial C}{\partial \mathcal{Y}^{(t-1)}} + \alpha(t) (\mathcal{Y}^{(t-1)} - \mathcal{Y}^{(t-2)})
+                        \]
+                    </div>
+
+                    <ul>
+                        <li class="fragment fade-up">\(\eta\): learning rate</li>
+                        <li class="fragment fade-up">\(\alpha(t)\): momentum en la iteración t</li>
+                        <li class="fragment fade-up">Se agrega ruido Gaussiano despues de cada iteración, para escapar de mínimos locales en la optimización</li>
+                        <li class="fragment fade-up">Se deben elegir parámetros razonables para el ruido inicial y qué tan rápido disminuye su varianza</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <p class="r-fit-text">t-Distributed Stochastic Neighbor Embedding</p>
+                    <div class="fragment fade-up">
+                        <p>Problemas de SNE</p>
+                        <ul>
+                            <li>Fución de costo difícil de optimizar</li>
+                            <li>Crowding Problem</li>
+                        </ul>
+                    </div>
+                    <div class="fragment fade-up">
+                        <p>Propuesta de cambio:</p>
+                        <ul>
+                            <li>Usar una versión simétrica de la función de costo de SNE, con un gradiente más fácil de calcular</li>
+                            <li>Usar una distribución t-student para calcular la similitud en \(\mathcal{Y}\), para aleviar el crowding problem y aumentar la velocidad de cómputo</li>
+                        </ul>
+                    </div>
+                </section>
+            </section>
+
+            <section>
+                <section style="text-align: center;">
+                    <h3>SNE simétrico</h3>
+                    <div class="fragment fade-in">
+                        <p>SNE</p>
+                        \[C = \sum_i KL(P_i || Q_i) = \sum_{i, j} p_{j|i} \log \frac{p_{j|i}}{q_{j|i}}\]
+                    </div>
+                    <div class="fragment fade-in">
+                        <p>t-SNE</p>
+                        \[C = KL(P || Q) = \sum_{i, j} p_{ij} \log \frac{p_{ij}}{q_{ij}}\]
+                    </div>
+                </section>
+
+                <section class="smaller">
+                    <div>
+                        \[C = KL(P || Q) = \sum_{i, j} p_{ij} \log \frac{p_{ij}}{q_{ij}}\]
+                    </div>
+
+                    <p class="fragment fade-up">\(q_{ij} = \frac{exp(-\|y_i - y_j\|^2)}{\sum_{k \neq l} exp(-\|y_l - y_k\|^2)}\) para \(i \neq j\)</p>
+                    <div class="fragment fade-up">
+                        <p>Podríamos definir:</p>
+                        <p>\(p_{ij} = \frac{exp(-\|x_i - x_j\|^2) / 2\sigma^2}{\sum_{k \neq l} exp(-\|x_l - x_k\|^2) / 2\sigma^2}\)</p>
+                    </div>
+                    <p class="fragment fade-up">Pero esto nos traería problemas con outliers, ya que si \(x_i\) fuera un outlier, entonces \(p_{ij} \approx 0\) \(\forall j\) y luego la posición de \(y_i\) tendría poco efecto en la función de costo.</p>
+                    <div class="fragment fade-up">
+                        <p>Entonces, definimos:</p>
+                        <p>\(p_{ij} = \frac{p_{j|i} + p_{i|j}}{2n}\)</p>
+                    </div>
+                    <div class="fragment fade-up">
+                        <p>\(\sum_j p_{ij} > \frac{1}{2n} \forall i\)</p>
+                        <p>Por lo tanto, todos los puntos tienen una contribución significante a la función de costo.</p>
+                    </div>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h3>Crowding Problem</h3>
+
+                    <!-- <p>TODO: completar</p> -->
+                </section>
+
+                <section>
+                    <h3>Distribución t-Student</h3>
+
+                    <p>\(f(t)={\frac {\Gamma ({\frac {\nu +1}{2}})}{{\sqrt {\nu \pi }}\,\Gamma ({\frac {\nu }{2}})}}\left(1+{\frac {t^{2}}{\nu }}\right)^{-(\nu +1)/2}\)</p>
+                    <p>Surge al estimar la media de una población distribuida normalmente, pero con varianza desconocida.</p>
+                </section>
+
+                <section>
+                    <p>Plan para aleviar el Crowding Problem:</p>
+
+                    <div class="fragment fade-up">
+                        <p>Para \(\mathcal{X}\), seguir usando la distribución Gaussiana como antes:</p>
+                        <p>\(p_{ij} = \frac{p_{j|i} + p_{i|j}}{2n}\)</p>
+                    </div>
+
+                    <div class="fragment fade-up">
+                        <p>Para \(\mathcal{Y}\), usar la distribución t-Student con 1 grado de libertad (equivalente a una distribución de Cauchy):</p>
+                        <p>\(q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_l - y_k\|^2)^{-1}}\)</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Resultados</h3>
+
+                    <img src="gradients.png">
+                </section>
+            </section>
+
+            <section>
+                <h3>Algoritmo simplificado t-SNE</h3>
+
+                <img src="algorithm.png">
+            </section>
+
+            <section>
+                <h3>Técnicas de optimización para t-SNE</h3>
+                <ul>
+                    <li>Adaptive learning rate</li>
+                    <li>Early compression</li>
+                    <li>Early exaggeration</li>
+                </ul>
+            </section>
+
+            <section>
+                <section>
+                    <h3>Experimentos</h3>
+
+                    <ul>
+                        <li>MNIST</li>
+                        <li>COIL-20</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3>MNIST</h3>
+
+                    <div class="r-stack" style="width: 70%;">
+                        <img src="mnist_tSNE.png" class="fragment fade-out" data-fragment-index="0">
+                        <img src="mnist_sammon.png" class="fragment fade-in-then-out" data-fragment-index="0">
+                        <img src="mnist_isomap.png" class="fragment fade-in-then-out" data-fragment-index="1">
+                        <img src="mnist_LLE.png" class="fragment fade-in" data-fragment-index="2">
+                    </div>
+                </section>
+
+                <section>
+                    <h3>COIL-20</h3>
+
+                    <img src="COIL-20.png" style="width: 70%;">
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h3>Debilidades</h3>
+
+                    <!-- <p>TODO: completar</p> -->
+                </section>
+            </section>
+
+            <section>
+                <h3>Conclusión</h3>
+
+                <!-- <p>TODO: completar</p> -->
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.4.0/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.4.0/plugin/math/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.4.0/plugin/math/math.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            plugins: [RevealMath.KaTeX]
+        })
+    </script>
+</body>
+</html>
