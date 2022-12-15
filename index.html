@@ -225,6 +225,20 @@
                         <p>Por lo tanto, todos los puntos tienen una contribución significante a la función de costo.</p>
                     </div>
                 </section>
+    
+                <section style="text-align: center;">
+                    <div>
+                        <p>SNE</p>
+                        \[
+                        \frac{\partial C}{\partial y_i} = 2 \sum_j (p_{j|i} - q_{j|i} + p_{i|j} - q_{i|j})(y_i - y_j)
+                        \]
+                    </div>
+
+                    <div class="fragment fade-in">
+                        <p>SNE simétrico</p>
+                        \[\frac{\partial C}{\partial y_i} = 4 \sum_j (p_{ij} - q_{ij}) (y_i - y_j)\]
+                    </div>
+                </section>
             </section>
 
             <section>
@@ -242,6 +256,10 @@
                 </section>
 
                 <section>
+                    <img src="images/cauchy_vs_normal.png" style="width: 70%;">
+                </section>   
+
+                <section>
                     <p>Plan para aleviar el Crowding Problem:</p>
 
                     <div class="fragment fade-up">
@@ -253,13 +271,11 @@
                         <p>Para \(\mathcal{Y}\), usar la distribución t-Student con 1 grado de libertad (equivalente a una distribución de Cauchy):</p>
                         <p>\(q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_l - y_k\|^2)^{-1}}\)</p>
                     </div>
-                </section>
 
-                <section>
-                    <h3>Resultados</h3>
-
-                    <img src="images/gradients.png">
-                </section>
+                    <div class="fragment fade-in">
+                        \(\frac{\partial C}{\partial y_i} = 4 \sum_j (p_{ij} - q_{ij}) (y_i - y_j) (1 + \| y_i - y_j\|^2)^{-1}\)
+                    </div>
+                </section>             
             </section>
 
             <section>
@@ -306,17 +322,15 @@
             </section>
 
             <section>
-                <section>
-                    <h3>Debilidades</h3>
-
-                    <!-- <p>TODO: completar</p> -->
-                </section>
-            </section>
-
-            <section>
                 <h3>Conclusión</h3>
-
-                <!-- <p>TODO: completar</p> -->
+                <p>t-SNE permite visualizar datos de altas dimensiones en scatterplots manteniendo la estructura local de los datos, mientras revela la presencia de estructuras globales en clusters.</p>
+                
+                <p class="fragment fade-in">Debilidades</p>
+                <ul>
+                    <li class="fragment fade-in">Reducción de dimensionalidad generalizada</li>
+                    <li class="fragment fade-in">Curse of intrinsic dimensionality</li>
+                    <li class="fragment fade-in">Función de costo no convexa</li>
+                </ul>
             </section>
         </div>
     </div>
