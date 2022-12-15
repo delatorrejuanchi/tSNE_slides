@@ -70,7 +70,6 @@
                     <li class="fragment fade-up">Introducción a SNE</li>
                     <li class="fragment fade-up">Presentación de t-SNE</li>
                     <li class="fragment fade-up">Experimentos comparando métodos</li>
-                    <li class="fragment fade-up">Debilidades de t-SNE</li>
                     <li class="fragment fade-up">Conclusión</li>
                 </ol>
             </section>
@@ -213,7 +212,7 @@
                     <p class="fragment fade-up">\(q_{ij} = \frac{exp(-\|y_i - y_j\|^2)}{\sum_{k \neq l} exp(-\|y_l - y_k\|^2)}\) para \(i \neq j\)</p>
                     <div class="fragment fade-up">
                         <p>Podríamos definir:</p>
-                        <p>\(p_{ij} = \frac{exp(-\|x_i - x_j\|^2) / 2\sigma^2}{\sum_{k \neq l} exp(-\|x_l - x_k\|^2) / 2\sigma^2}\)</p>
+                        <p>\(p_{ij} = \frac{exp(-\|x_i - x_j\|^2) / 2\sigma^2}{\sum_{k \neq l} exp(-\|x_l - x_k\|^2 / 2\sigma^2)}\)</p>
                     </div>
                     <p class="fragment fade-up">Pero esto nos traería problemas con outliers, ya que si \(x_i\) fuera un outlier, entonces \(p_{ij} \approx 0\) \(\forall j\) y luego la posición de \(y_i\) tendría poco efecto en la función de costo.</p>
                     <div class="fragment fade-up">
@@ -225,27 +224,11 @@
                         <p>Por lo tanto, todos los puntos tienen una contribución significante a la función de costo.</p>
                     </div>
                 </section>
-    
-                <section style="text-align: center;">
-                    <div>
-                        <p>SNE</p>
-                        \[
-                        \frac{\partial C}{\partial y_i} = 2 \sum_j (p_{j|i} - q_{j|i} + p_{i|j} - q_{i|j})(y_i - y_j)
-                        \]
-                    </div>
-
-                    <div class="fragment fade-in">
-                        <p>SNE simétrico</p>
-                        \[\frac{\partial C}{\partial y_i} = 4 \sum_j (p_{ij} - q_{ij}) (y_i - y_j)\]
-                    </div>
-                </section>
             </section>
 
             <section>
                 <section>
                     <h3>Crowding Problem</h3>
-
-                    <!-- <p>TODO: completar</p> -->
                 </section>
 
                 <section>
@@ -278,11 +261,11 @@
                 </section>             
             </section>
 
-            <section>
+            <!-- <section>
                 <h3>Algoritmo simplificado t-SNE</h3>
 
                 <img src="images/algorithm.png">
-            </section>
+            </section> -->
 
             <section>
                 <h3>Técnicas de optimización para t-SNE</h3>
