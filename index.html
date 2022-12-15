@@ -205,20 +205,8 @@
                 </section>
 
                 <section class="smaller">
-                    <div>
-                        \[C = KL(P || Q) = \sum_{i, j} p_{ij} \log \frac{p_{ij}}{q_{ij}}\]
-                    </div>
-
-                    <p class="fragment fade-up">\(q_{ij} = \frac{exp(-\|y_i - y_j\|^2)}{\sum_{k \neq l} exp(-\|y_l - y_k\|^2)}\) para \(i \neq j\)</p>
-                    <div class="fragment fade-up">
-                        <p>Podríamos definir:</p>
-                        <p>\(p_{ij} = \frac{exp(-\|x_i - x_j\|^2) / 2\sigma^2}{\sum_{k \neq l} exp(-\|x_l - x_k\|^2 / 2\sigma^2)}\)</p>
-                    </div>
-                    <p class="fragment fade-up">Pero esto nos traería problemas con outliers, ya que si \(x_i\) fuera un outlier, entonces \(p_{ij} \approx 0\) \(\forall j\) y luego la posición de \(y_i\) tendría poco efecto en la función de costo.</p>
-                    <div class="fragment fade-up">
-                        <p>Entonces, definimos:</p>
-                        <p>\(p_{ij} = \frac{p_{j|i} + p_{i|j}}{2n}\)</p>
-                    </div>
+                    <p>\(q_{ij} = \frac{exp(-\|y_i - y_j\|^2)}{\sum_{k \neq l} exp(-\|y_l - y_k\|^2)}\) para \(i \neq j\)</p>
+                    <p>\(p_{ij} = \frac{p_{j|i} + p_{i|j}}{2n}\)</p>
                     <div class="fragment fade-up">
                         <p>\(\sum_j p_{ij} > \frac{1}{2n} \forall i\)</p>
                         <p>Por lo tanto, todos los puntos tienen una contribución significante a la función de costo.</p>
@@ -290,10 +278,10 @@
                     <h3>MNIST</h3>
 
                     <div class="r-stack" style="width: 70%;">
-                        <img src="images/mnist_tSNE.png" class="fragment fade-out" data-fragment-index="0">
-                        <img src="images/mnist_sammon.png" class="fragment fade-in-then-out" data-fragment-index="0">
-                        <img src="images/mnist_isomap.png" class="fragment fade-in-then-out" data-fragment-index="1">
-                        <img src="images/mnist_LLE.png" class="fragment fade-in" data-fragment-index="2">
+                        <img src="images/mnist_isomap.png" class="fragment fade-out" data-fragment-index="0">
+                        <img src="images/mnist_LLE.png" class="fragment fade-in-then-out" data-fragment-index="0">
+                        <img src="images/mnist_sammon.png" class="fragment fade-in-then-out" data-fragment-index="1">
+                        <img src="images/mnist_tSNE.png" class="fragment fade-in" data-fragment-index="2">
                     </div>
                 </section>
 
